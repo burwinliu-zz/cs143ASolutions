@@ -48,7 +48,9 @@ Xv6 shell implements a pipe command (e.g., ls — wc) as follows:
 0?
 
 ### Solution
-TODO
+The file descriptor 1 is the standard output. So the left side process is the input of the pipe. It closes its standard output so that in the next dup command, the input of the pipe can be directed to the output of this process.  
+  
+Likewise, the file descriptor 0 is the standard input So the right side process is the output of the pipe. It closes its standard input so that in the next dup command, the output of the pipe can be directed to the input of this process.
   
 ## Part B
 ### Question
@@ -57,9 +59,9 @@ parent and child will reach the second fork() (line 8661) creating two child pro
 child processes will start reading from the pipe and will try to execute the right side of
 the pipe. This seems wrong. Can you explain what is happening?
 ### Solution
-TODO
+This is not true because in the runcmd function, the process will be executing a new program and they will exit rather than returning to the following codes in this page.
+   
   
-
 # Question 3
 > Topic: OS isolation and protection
   
@@ -67,7 +69,7 @@ TODO
 ### Question
 (5 points) In xv6 user processes cannot access kernel memory. Explain why.
 ### Solution
-TODO
+The user bit is not set in either page directory entry or page table entry (or both) for all translations that allow accessing pages of the kernel.  
   
 ## Part B
 ### Question
@@ -75,7 +77,7 @@ TODO
 bit in the page tables. What changes need to be made to xv6 to ensure isolation of the
 kernel from user-processes?
 ### Solution
-TODO
+If the Kernel is always in the front of physical memory, that is it starts at address 0 and goes till address phystop, we could enable segmentation to ensure that the physical memory that the Kernel is in can not be reached by the process.  
   
   
 ## Question 4
@@ -94,11 +96,22 @@ in 2-3K of memory
 many pages of memory are allocated when xv6 creates a smallest process? Count both
 user-level and kernel resources.
 #### Solution
-TODO
+Since the process is small, we assume each part of the user-level program can fit in one page.
+
+For user-level: One for text and data, one for guard page, one for stack, and 1 for the Page table directory, 1 for the Page table. Totally at least 5 on the user's side.
+
+For kernel-level: 0 ~ 224MB, and we know that a page maps 4MB of space, that is it needs 224MB/4MB pages. Also, one for kernel stack, one for BIOS region.
+
+<pre>
+224 / 4 + 5 + 2
+## [1] 63
+</pre>
+
+Therefore, in total there should be 63 pages.
   
 ### Part B
 #### Question
  (10 points) Suggest a set of changes to xv6 aimed at minimizing the number of pages that
 are required for creating very small processes, e.g., the once that are 1K in size.
 #### Solution
-TODO
+Carefully analyze what system calls are used by these web page processes. Then in the mapped kernel space, omit out the functions that are not used by these small programs. It should be common that the small programs should only use limited functions of the system - otherwise, they won't be small.
