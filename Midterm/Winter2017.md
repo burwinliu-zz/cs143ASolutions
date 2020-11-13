@@ -20,20 +20,20 @@ Xv6 shell implements a pipe command (e.g., ls — wc) as follows:
 8650 case PIPE:
 8651 pcmd = (struct pipecmd*)cmd;
 8652 if(pipe(p) < 0)
-8653 panic("pipe");
+8653    panic("pipe");
 8654 if(fork1() == 0){
-8655 close(1);
-8656 dup(p[1]);
-8657 close(p[0]);
-8658 close(p[1]);
-8659 runcmd(pcmd>left);
+8655    close(1);
+8656    dup(p[1]);
+8657    close(p[0]);
+8658    close(p[1]);
+8659    runcmd(pcmd>left);
 8660 }
 8661 if(fork1() == 0){
-8662 close(0);
-8663 dup(p[0]);
-8664 close(p[0]);
-8665 close(p[1]);
-8666 runcmd(pcmd>right);
+8662    close(0);
+8663    dup(p[0]);
+8664    close(p[0]);
+8665    close(p[1]);
+8666    (pcmd>right);
 8667 }
 8668 close(p[0]);
 8669 close(p[1]);
