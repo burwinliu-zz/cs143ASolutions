@@ -39,6 +39,12 @@ Finally, write_head again to erase the transactions and writing to block 2 once 
 (b) (5 points) Briefly explain what block 32 contains in the above trace. Why is it written?
 
 ### Solution
-It was written to as it acts as the 
+It was written to as it block 32 as a new inode for the new file, which cat2 will now correspond to. It is written to properly initiate the new file.
 
+## Part C
+### Problem
+(c) (5 points) What does block 3 contain?
+
+### Solution
+Block 3 contains 
 
