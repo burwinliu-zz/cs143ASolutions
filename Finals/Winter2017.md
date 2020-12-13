@@ -5,7 +5,7 @@
 ### Problem
 Xv6 lays out the file system on disk as follows:
 
-![Table Image](../W2017Final_Aqs.png)
+![Table Image](../img/W2017Final_Aqs.png)
 
 
 Block 1 contains the super block. Blocks 2 through 31 contain the log header and the log.
