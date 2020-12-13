@@ -1,8 +1,7 @@
 # Fall 2018
 # Question 1
 > Topic: File system
-## Part A
-### Problem
+
 Xv6 lays out the file system on disk as follows:
 
 ![Table Image](../img/W2017Final_Aqs.png)
@@ -24,15 +23,22 @@ write 59
 write 2
 $
 </pre>
-
+## Part A
+### Problem
 (a) (5 points) Why is block 2 written twice?
+### Solution
 The Logging System in xv6 is setup in a manner to allow recovery from failure. So therefore, on writes to logs, one does not simply input their information into the logging section. So, follow the commit message -- 
-<pre>
-First, write_log will alter the log by getting info to the log. (write 3, 4)
-Next, it writes the head with write_head, the true commit and the modification of block 2 as it is the header. (write 2)
-Then, it writes to disk with install_trans() into correct data locations (write 32, 59)
-Finally, write_head again to erase the transactions and writing to block 2 once again. Therefore, block 2 was written to twice. (write 2)
+  
+First, write_log will alter the log by getting info to the log. (write 3, 4)  
+Next, it writes the head with write_head, the true commit and the modification of block 2 as it is the header. (write 2)  
+Then, it writes to disk with install_trans() into correct data locations (write 32, 59)  
+Finally, write_head again to erase the transactions and writing to block 2 once again. (write 2)  
 
+## Part B
+### Problem
+(b) (5 points) Briefly explain what block 32 contains in the above trace. Why is it written?
 
+### Solution
+It was written to as it acts as the 
 
 
