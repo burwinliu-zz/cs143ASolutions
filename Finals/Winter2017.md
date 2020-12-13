@@ -46,5 +46,29 @@ It was written to as it block 32 as a new inode for the new file, which cat2 wil
 (c) (5 points) What does block 3 contain?
 
 ### Solution
-Block 3 contains 
+Block 3 contains the log blocks which act as a fail safe and interim place to write blocks before they are commited to memory
 
+## Part D
+### Problem
+(d) (5 points) If writes to 32 and 59 are reordered like below, will it violate correctness of the
+file system, explain why?
+
+<pre>
+$ ln cat cat2
+write 3
+write 4
+write 2
+write 59
+write 32
+write 2
+$
+</pre>
+### Solution
+No it would not. Due to the nature of this logging mechanism, either the entire function goes through once we get to this section (both write 59 and 32) or none go through -- since write 2 has succeeded once we reached this stage, we know that these two writes are atmoic for all intents and purposes, and therefore, reordering it will not violage the correctness.
+
+# Question 2
+> Topic: Memory Management
+
+## Part A
+### Problem
+(a) (5 points) Explain organization of the xv6 memory allocator.
