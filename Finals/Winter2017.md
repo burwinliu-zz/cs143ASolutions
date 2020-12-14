@@ -1,6 +1,6 @@
  Answers may be found here: https://www.ics.uci.edu/~aburtsev/143A/2017winter/final-answ/paper.pdf
 
-# Fall 2018
+# Winter 2017
 # Question 1
 > Topic: File system
 
