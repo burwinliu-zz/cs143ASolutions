@@ -165,3 +165,159 @@ that wins the lock, reads the counter, exits to user-space and returns back to t
 (around 400 cycles) to wait on the lock again (on average waiting for 7*time-to-acquireand-release-the-lock cycles, which depending on the architecture can take 240-620 cycles).
 
 (My understanding: Due to the use of a cross process coordination and sleep locks, regardless of the number of processors, the number of ticks are uniformally regulated, and so therefore, the throughput is still held as if it were running on a single processor due to the serialized execution of the process)
+
+# Question 4
+
+> Topic: Scheduling
+## Part A
+### Problem
+(10 points) You would like to extend xv6 with priority based scheduler, i.e., each process
+has a priority, and processes with a higher priority are scheduled first. Write the code for
+your implementation below (which xv6 functions need to be changed?)
+Implement the Linux O(1) scheduler.
+
+### Solution
+<pre>
+struct proc* sched_next() {
+    int i;
+    do {
+        // Loop through the priority array starting from the
+        // highest priority
+        for (i = MAX_PRIORITY - 1; i--; i >= 0) {
+            if(current->prio[i]->head ! = 0) {
+                p = current->prio->[i]->head;
+                current[i]->head = current->prio[i]->head->next;
+                break;
+            }
+        }
+        if(p != 0)
+            return p;
+        // No processes in the current queue
+        // flip current and expried queues
+        tmp = current;
+        current = expired;
+        expired = tmp;
+        // we believe there is always one non-sleeping process
+        // now we’ll definitely find something
+    } while (1);
+    return 0;
+}
+// Put the process in expired queue
+void sched_put(struct proc *p) {
+    p->next = expired->prio[p->prio]->head;
+    expired->prio[p->prio]->head = p;
+    return;
+}
+scheduler(void)
+{
+    struct proc *p;
+    for(;;) {
+        sti();
+        Principles of Operating Systems Final - Page 8 of 12 03/22/2017
+        acquire(&ptable.lock);
+        // get the next process to run
+        p = sched_next();
+        proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+        swtch(&cpu->scheduler, p->context);
+        switchkvm();
+        proc = 0;
+        // put the process back
+        sched_put(p);
+        release(&ptable.lock);
+    }
+}
+
+</pre>
+
+## Part B
+### Problem
+ (10 points) Now you would like to extend your priority scheduler with support for interactive tasks, e.g., a task that spends a lot of time waiting, should run first (i.e., receive
+priority boost). Provide code that handles waiting tasks and implements priority boost
+(again, just change related xv6 functions).
+
+<pre>
+// Put the process in expired queue but now with a boost
+void sched_put(struct proc *p) {
+    p->next = expired->prio[p->prio + p->boost]->head;
+    expired->prio[p->prio + p->boost]->head = p;
+    return;
+}
+// Naive boost function
+int boost(int wait_time){
+    if (wait_time > 10)
+        return 5;
+        return 0;
+    }
+wakeup1(void *chan)
+{
+    struct proc *p;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+        if(p->state == SLEEPING && p->chan == chan) {
+            p->state = RUNNABLE;
+        // compute the boost based on how long the process was waiting
+        p->boost = boost(sys_uptime() - p->start_wait_ticks);
+        sched_put(p);
+    }
+}
+// Modify sleep to account for wait time
+void
+sleep(void *chan, struct spinlock *lk) {
+    ...
+    proc->state = SLEEPING;
+    proc->start_wait_ticks = sys_uptime();
+    sched();
+    ...
+}
+</pre>
+
+# Question 4
+> Topic: Page Tables
+
+Xv6 uses 4MB page table during boot. It is defined as:
+1406 // The boot page table used in entry.S and entryother.S.
+1407 // Page directories (and page tables) must start on page boundaries,
+1408 // hence the __aligned__ attribute.
+1409 // PTE_PS in a page directory entry enables 4Mbyte pages.
+1410
+1411 __attribute__((__aligned__(PGSIZE)))
+1412 pde_t entrypgdir[NPDENTRIES] = {
+1413    // Map VAs [0, 4MB) to PAs [0, 4MB)
+1414    [0] = (0) | PTE_P | PTE_W | PTE_PS,
+1415    // Map VAs [KERNBASE, KERNBASE+4MB) to PAs [0, 4MB)
+1416    [KERNBASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
+1417 };
+## Part A
+### Problem
+(5 points) What virtual addresses (and to what physical addresses) does this page table
+map?
+### Solution
+// Map VAs [0, 4MB) to PAs [0, 4MB)  
+// Map VAs [2GBs, 2GBs+4MB) to PAs [0, 4MB)
+
+## Part B
+### Problem
+ (10 points) Imagine now that 4MB pages are not available, and you have to use regular
+4KB pages. How do you need to change the definition of entrypgdir for xv6 to work
+correctly (provide code and short explanation).
+
+### Solution
+<pre>
+#define NPDENTRIES 1024
+
+__attribute__((__aligned__(PGSIZE)))
+pde_t entrypgdir[NPDENTRIES] = {
+   // Map VAs [0, 4MB) to PAs [0, 4MB)
+   [0] = V2P(entrypgtable) | PTE_P | PTE_W | PTE_PS,
+   // Map VAs [KERNBASE, KERNBASE+4MB) to PAs [0, 4MB)
+   [KERNBASE>>PDXSHIFT] = V2P(entrypgtable) | PTE_P | PTE_W | PTE_PS,
+};
+
+pde_t entrypgtable[NPDENTRIES] = {
+    0x000000 | PTE_P | PTE_W,
+    0x000001 | PTE_P | PTE_W,
+    ... (for all values of NPDENTRIES)
+    0x3ff000 | PTE_P | PTE_W
+}
+</pre>
