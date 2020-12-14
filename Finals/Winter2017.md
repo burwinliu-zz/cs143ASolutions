@@ -276,6 +276,7 @@ sleep(void *chan, struct spinlock *lk) {
 > Topic: Page Tables
 
 Xv6 uses 4MB page table during boot. It is defined as:
+<pre>
 1406 // The boot page table used in entry.S and entryother.S.
 1407 // Page directories (and page tables) must start on page boundaries,
 1408 // hence the __aligned__ attribute.
@@ -288,13 +289,14 @@ Xv6 uses 4MB page table during boot. It is defined as:
 1415    // Map VAs [KERNBASE, KERNBASE+4MB) to PAs [0, 4MB)
 1416    [KERNBASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
 1417 };
+</pre>
 ## Part A
 ### Problem
 (5 points) What virtual addresses (and to what physical addresses) does this page table
 map?
 ### Solution
 // Map VAs [0, 4MB) to PAs [0, 4MB)  
-// Map VAs [2GBs, 2GBs+4MB) to PAs [0, 4MB)
+// Map VAs [2GBs, 2GBs+4MB) to PAs [0, 4MB)  
 
 ## Part B
 ### Problem
